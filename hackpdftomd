@@ -1,0 +1,183 @@
+
+3
+
+Automatic Zoom
+NevUp AI Trading Coach 
+Remote Hiring Hackathon 2026  -  Kick-Off Packet 
+ 
+ 
+Remote · Async 72-Hour Duration 3 Independent  Tracks 
+ 
+1. Overview & Global Rules 
+Welcome to the NevUp  Hiring Hackathon  2026. You are building  components  of NevUp's  real product, 
+a behavioral  intelligence  platform for retail day traders. The three tracks are independent  but share a 
+single data contract and authentication  scheme. Read this entire document before writing a single line 
+of code. 
+ 
+Format 
+Property Detail 
+Format Remote, fully async  -  work from wherever you are 
+Duration 72 hours from kick-off email timestamp 
+Tracks 3 independent  tracks  -  pick exactly one 
+Submission Live deployment  URL + public GitHub repo 
+Late policy Disqualified.  No exceptions. 
+ 
+Global Rules  -  Applies to Every Track 
+• No mock or hardcoded data in any demo. All data must be seeded or live-generated  using the 
+provided seed files attached to this email. 
+• All services  must be containerised  with Docker + docker-compose.  Reviewers  must be able to run 
+your full stack with a single docker compose  up  -  no manual steps, no missing env vars, no 
+README footnotes  that say 'first install X'. 
+• Error handling is a first-class requirement.  Every external call must have a timeout, retry, or 
+fallback. Unhandled  promise rejections  and HTTP 500 responses  with an empty body will 
+penalise your score. 
+• Every submission  must include  a DECISIONS.md  file at the repo root  -  one paragraph  per 
+significant  architectural decision  explaining the why, not the what. 
+• All three tracks share an identical judging rubric (see below). 
+ 
+ 
+Judging Rubric 
+Criterion Weight What Reviewers  Look For 
+Technical  Depth 35% Performance  under load, correct algorithmic  choices, 
+system design quality. 
+Product Thinking 30% Does the solution  solve the actual NevUp product problem, 
+not just the literal spec? 
+Code Quality 20% Readability,  test coverage,  separation  of concerns,  no 
+obvious anti-patterns. 
+Documentation 15% DECISIONS.md  quality,  README clarity, inline comments 
+where non-obvious. 
+ 
+2. Attached Files  -  What Each Track Needs 
+Three files are attached  to this drive. The table below maps each file to the tracks that require it. 
+ 
+File Track 1 Track 2 Track 3 Purpose 
+nevup_seed_dataset.csv Required - Required 388 trades across 10 
+synthetic traders. Track 1 
+must load it into the DB on 
+startup. Track 3 must use it as 
+the data source for the mock 
+API. 
+nevup_seed_dataset.json - Required - Same 388 trades structured 
+as nested trader profiles with 
+ground-truth pathology labels. 
+Track 2 uses this for 
+behavioral profiling and the 
+evaluation harness. 
+nevup_openapi.yaml Required Reference Required OpenAPI 3.0 spec. Track 1 
+must implement it. Track 3 
+must consume it. Track 2 
+uses it as an API reference for 
+the memory contract 
+endpoints. 
+ 
+Seed Dataset Summary 
+10 synthetic  trader profiles  |  52 sessions  |  388 trades  |  Date range:  Jan – Feb 2026 
+Each trader has exactly  one labelled  behavioural pathology   -  except Avery Chen, who is a 
+control profile with no pathology. 
+Pathologies  present: revenge_trading,  overtrading,  fomo_entries,  plan_non_adherence, 
+premature_exit,  loss_running,  session_tilt, time_of_day_bias,  position_sizing_inconsistency 
+ 
+Seed Trader Reference 
+Name userId Ground-Truth Pathology Sess. Trades 
+Alex Mercer f412f236-4edc-47a2-8f54-
+8763a6ed2ce8 revenge_trading 5 25 
+Jordan Lee fcd434aa-2201-4060-aeb2-
+f44c77aa0683 overtrading 5 80 
+Sam Rivera 84a6a3dd-f2d0-4167-960b-
+7319a6033d49 fomo_entries 5 30 
+Casey Kim 4f2f0816-f350-4684-b6c3-
+29bbddbb1869 plan_non_adherence 5 35 
+Morgan Bell 75076413-e8e8-44ac-861f-
+c7acb3902d6d premature_exit 5 35 
+Taylor Grant 8effb0f2-f16b-4b5f-87ab-
+7ffca376f309 loss_running 5 30 
+Riley Stone 50dd1053-73b0-43c5-8d0f-
+d2af88c01451 session_tilt 5 40 
+Drew Patel af2cfc5e-c132-4989-9c12-
+2913f89271fb time_of_day_bias 6 48 
+Quinn 
+Torres 
+9419073a-3d58-4ee6-a917-
+be2d40aecef2 position_sizing_inconsistency 5 35 
+Avery Chen e84ea28c-e5a7-49ef-ac26-
+a873e32667bd  -  (control, no pathology) 6 30 
+ 
+Before You Start  -  One-Time Setup 
+Complete  these two steps before writing any code. Both are required regardless  of which track you are 
+on. 
+ 
+Step 1  -  Seed your database  or load your data file 
+Track 1 (System of Record): load nevup_seed_dataset.csv  into your database  on container 
+startup via a migration or seed script. 
+Track 2 (System of AI Engine):  load nevup_seed_dataset.json  directly   -  your behavioral 
+profiling and eval harness must read from this file. 
+Track 3 (System of Engagement):  nevup_seed_dataset.csv  is the backing data for the mock 
+API server (Step 2 below). 
+ 
+Step 2  -  Spin up the mock API server (Track 3 required,  others optional for local 
+testing) 
+No account or installation  needed beyond Node.js.  Run this single command from the 
+directory containing  nevup_openapi.yaml: 
+ 
+npx @stoplight/prism-cli mock nevup_openapi.yaml --port 4010 
+ 
+All API endpoints  are then live at http://localhost:4010.  Track 3 must consume  this mock server  -  do 
+not invent your own contract. Track 1 and Track 2 participants  may also use it to test their 
+implementations  against the shared OpenAPI  contract. 
+ 
+3. Shared Data Contract  -  Canonical Trade Schema 
+All three tracks implement  or consume  this exact schema.  Any deviation  breaks interoperability  scoring. 
+Field names, types, and enum values are not negotiable. 
+ 
+{   tradeId:         uuid v4,   userId:          uuid v4,   asset:           string,                        // e.g. 'AAPL', 'BTC/USD'   assetClass:      equity | crypto | forex,   direction:       long | short,   entryPrice:      decimal(18,8),   exitPrice:       decimal(18,8) | null,   quantity:        decimal(18,8),   entryAt:         ISO-8601 UTC,   exitAt:          ISO-8601 UTC | null,   status:          open | closed | cancelled,   planAdherence:   integer 1-5 | null,           // user self-rating at close   emotionalState:  calm | anxious | greedy | fearful | neutral | null,   entryRationale:  string <= 500 chars | null,   sessionId:       uuid v4                       // groups trades in one session } 
+ 
+  
+TRACK 1   System of Record   Backend Engineering 
+Problem Statement 
+Build a real-time trade journal engine  with behavioral  analytics  -  defined contracts, proven  throughput. 
+NevUp's  core stores every trade with its full psychological  context: not just P&L, but the emotional 
+state, entry rationale, and plan adherence for each decision. You will build the write path, the async 
+analytics pipeline,  and the read API from scratch. The system must be provably  correct under load, 
+multi-tenant  by default, and expose a contract that the System of AI Engine and System of Engagement 
+tracks can depend on without negotiation. 
+ 
+Seed Data 
+File: nevup_seed_dataset.csv  -  388 trades, 10 traders,  52 sessions.  Load this into your database 
+on container  startup via a migration or seed script. The GET /users/:id/metrics  endpoint must return 
+queryable  results against this dataset  from the moment reviewers  run docker compose up. 
+ 
+Behavioral Metrics  -  Compute All Five 
+These five metrics must be computed  asynchronously  outside the write path for every closed trade. 
+Their definitions are deterministic   -  two independent  implementations  must produce  identical outputs 
+from the same input. 
+ 
+# Metric Definition 
+1 Plan Adherence 
+Score 
+Rolling 10-trade average  of planAdherence  ratings per user. 
+Queryable  via the read API. 
+2 Revenge Trade 
+Flag 
+If a trade opens within 90 seconds of a losing close AND 
+emotionalState  is anxious or fearful, tag that trade revengeFlag = 
+true. 
+3 Session Tilt Index Ratio of (loss-following  trades / total trades)  in the current 
+sessionId.  Updated on each close event. 
+4 Win Rate by 
+Emotional  State 
+For each emotionalState  value, maintain a per-user  running 
+win/loss count. Must be queryable via the read API with date range 
+filtering. 
+5 Overtrading 
+Detector 
+If a user opens more than 10 trades in any 30-minute  sliding 
+window, emit an overtrading  event onto the event bus. Must not 
+block the write path. 
+ 
+Hard Requirements 
+# Requirement Detail 
+1 Idempotent  Write 
+API 
+POST /trades must be idempotent  on tradeId. Duplicate 
+submissions  must return HTTP 200 with the existing record  -  not 
+500 or 409. Prove this in automated tests. 
