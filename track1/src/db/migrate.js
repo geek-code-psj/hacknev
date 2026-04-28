@@ -1,5 +1,5 @@
 'use strict';
-const pool = require('./pool');
+const { initPool } = require('./pool');
 
 const SCHEMA = `
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -74,6 +74,7 @@ CREATE INDEX IF NOT EXISTS idx_overtrading_user ON overtrading_events ("userId")
 `;
 
 async function migrate() {
+  const pool = await initPool();
   console.log('>>> MIGRATE: connecting to pool...');
   const client = await pool.connect();
   console.log('>>> MIGRATE: client acquired, running schema...');

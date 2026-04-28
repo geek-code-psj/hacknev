@@ -2,9 +2,10 @@
 const fs   = require('fs');
 const path = require('path');
 const { parse } = require('csv-parse/sync');
-const pool = require('./pool');
+const { initPool } = require('./pool');
 
 async function seed() {
+  const pool = await initPool();
   const csvPath = path.join(__dirname, '../../data/seed.csv');
   if (!fs.existsSync(csvPath)) {
     console.log(JSON.stringify({ event: 'seed_skip', reason: 'no seed file' }));
