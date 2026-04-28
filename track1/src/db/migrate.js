@@ -74,7 +74,9 @@ CREATE INDEX IF NOT EXISTS idx_overtrading_user ON overtrading_events ("userId")
 `;
 
 async function migrate() {
+  console.log(JSON.stringify({ event: 'migrate_start', pool_id: pool.poolId }));
   const client = await pool.connect();
+  console.log(JSON.stringify({ event: 'migrate_client_acquired' }));
   try {
     await client.query(SCHEMA);
     console.log(JSON.stringify({ event: 'migration_complete' }));

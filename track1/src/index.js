@@ -66,14 +66,21 @@ async function start() {
     console.log(JSON.stringify({ event: 'startup', step: 'seed' }));
     await seed();
 
-    console.log(JSON.stringify({ event: 'startup', step: 'broker' }));
-    await broker.connect();
+    // RabbitMQ is optional - continue without it if unavailable
+    if (process.env.RABBITMQ_URL !== 'none') {
+      console.log(JSON.stringify({ event: 'startup', step: 'broker' }));
+      try {
+        await broker.connect();
+      } catch (brokerErr) {
+        console.error(JSON.stringify({ event: 'broker_skip', error: brokerErr.message }));
+      }
+    }
 
     app.listen(PORT, '0.0.0.0', () => {
       console.log(JSON.stringify({ event: 'server_ready', port: PORT }));
     });
   } catch (err) {
-    console.error(JSON.stringify({ event: 'startup_fatal', error: err.message }));
+    console.error(JSON.stringify({ event: 'startup_fatal', error: err.message, stack: err.stack }));
     process.exit(1);
   }
 }

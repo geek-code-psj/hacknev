@@ -8,10 +8,16 @@ const EXCHANGE   = 'nevup.events';
 const QUEUE_METRICS  = 'metrics.compute';
 const QUEUE_OVERTRADE = 'overtrading.events';
 
-async function connect(retries = 20, delayMs = 3000) {
+async function connect(retries = 5, delayMs = 3000) {
+  // Skip if no RabbitMQ URL configured
+  if (!process.env.RABBITMQ_URL || process.env.RABBITMQ_URL === 'none') {
+    console.log(JSON.stringify({ event: 'rabbitmq_disabled' }));
+    return null;
+  }
+
   for (let i = 0; i < retries; i++) {
     try {
-      _conn    = await amqp.connect(process.env.RABBITMQ_URL || 'amqp://nevup:nevup_secret@localhost:5672');
+      _conn    = await amqp.connect(process.env.RABBITMQ_URL);
       _channel = await _conn.createChannel();
 
       await _channel.assertExchange(EXCHANGE, 'topic', { durable: true });
@@ -35,7 +41,10 @@ async function connect(retries = 20, delayMs = 3000) {
 }
 
 function publish(routingKey, payload) {
-  if (!_channel) return false;
+  if (!_channel) {
+    console.log(JSON.stringify({ event: 'broker_skip_publish', reason: 'no_channel', routingKey }));
+    return false;
+  }
   try {
     return _channel.publish(
       EXCHANGE, routingKey,
