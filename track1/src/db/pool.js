@@ -7,15 +7,26 @@ const resolve4 = promisify(dns.resolve4);
 // Parse DATABASE_URL if provided (Railway, etc.)
 console.log('>>> DB CONFIG: DATABASE_URL set:', !!process.env.DATABASE_URL);
 
-async function resolveHostToIPv4(hostname) {
+const resolve6 = promisify(dns.resolve6);
+
+async function resolveHost(hostname) {
+  // Try IPv4 first
   try {
     const addresses = await resolve4(hostname);
-    console.log('>>> DNS: resolved ' + hostname + ' -> ' + addresses[0]);
+    console.log('>>> DNS: resolved ' + hostname + ' (A) -> ' + addresses[0]);
     return addresses[0];
   } catch (e) {
-    console.log('>>> DNS: resolution failed, using original:', e.message);
-    return hostname;
+    console.log('>>> DNS: A record failed, trying AAAA:', e.message);
   }
+  // Try IPv6
+  try {
+    const addresses = await resolve6(hostname);
+    console.log('>>> DNS: resolved ' + hostname + ' (AAAA) -> ' + addresses[0]);
+    return addresses[0];
+  } catch (e) {
+    console.log('>>> DNS: AAAA record failed:', e.message);
+  }
+  return hostname;
 }
 
 async function initPool() {
@@ -24,11 +35,9 @@ async function initPool() {
   if (process.env.DATABASE_URL) {
     try {
       const url = new URL(process.env.DATABASE_URL);
-      const hostname = url.hostname;
-      // Force IPv4 to avoid Supabase IPv6 routing issues on Railway
-      const resolvedHost = await resolveHostToIPv4(hostname);
+      // Use hostname directly - pg library handles DNS
       pgConfig = {
-        host: resolvedHost,
+        host: url.hostname,
         port: parseInt(url.port || '5432'),
         database: url.pathname.replace('/', ''),
         user: url.username,
@@ -54,6 +63,7 @@ async function initPool() {
     max: 10,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
+    ssl: { rejectUnauthorized: false },
   });
 
   pool.on('error', (err) => {
