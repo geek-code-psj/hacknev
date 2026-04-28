@@ -3,7 +3,7 @@ const { Pool } = require('pg');
 
 // Parse DATABASE_URL if provided (Railway, etc.)
 let pgConfig = {};
-console.log(JSON.stringify({ event: 'db_config', DATABASE_URL: !!process.env.DATABASE_URL }));
+console.log('>>> DB CONFIG: DATABASE_URL set:', !!process.env.DATABASE_URL);
 
 if (process.env.DATABASE_URL) {
   try {
@@ -15,7 +15,7 @@ if (process.env.DATABASE_URL) {
       user: url.username,
       password: url.password,
     };
-    console.log(JSON.stringify({ event: 'db_config', host: pgConfig.host, port: pgConfig.port, database: pgConfig.database }));
+    console.log('>>> DB CONFIG: host=' + pgConfig.host + ', port=' + pgConfig.port + ', db=' + pgConfig.database);
   } catch (e) {
     console.error(JSON.stringify({ event: 'db_url_parse_error', error: e.message, stack: e.stack }));
   }
@@ -27,7 +27,7 @@ if (process.env.DATABASE_URL) {
     user:     process.env.DB_USER     || 'nevup',
     password: process.env.DB_PASSWORD || 'nevup_secret',
   };
-  console.log(JSON.stringify({ event: 'db_config', host: pgConfig.host, port: pgConfig.port, using: 'env_vars' }));
+  console.log('>>> DB CONFIG: using env vars, host=' + pgConfig.host);
 }
 
 const pool = new Pool({
