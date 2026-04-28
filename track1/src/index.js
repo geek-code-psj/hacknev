@@ -20,7 +20,7 @@ const usersRouter   = require('./routes/users');
 const healthRouter  = require('./routes/health');
 
 const app  = express();
-const PORT = parseInt(process.env.PORT || '3000');
+const PORT = parseInt(process.env.PORT || '8080');
 
 app.use(helmet());
 app.use(cors());
