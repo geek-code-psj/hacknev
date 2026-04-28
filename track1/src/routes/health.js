@@ -1,18 +1,30 @@
 'use strict';
 const express = require('express');
-const pool    = require('../db/pool');
+const { initPool } = require('../db/pool');
 const broker  = require('../queue/broker');
 
 const router = express.Router();
+
+let _pool = null;
+
+async function getPool() {
+  if (!_pool) {
+    _pool = await initPool();
+  }
+  return _pool;
+}
 
 router.get('/', async (req, res) => {
   let dbConnection = 'disconnected';
   let queueLag     = -1;
 
   try {
-    await pool.query('SELECT 1');
+    const p = await getPool();
+    await p.query('SELECT 1');
     dbConnection = 'connected';
-  } catch {}
+  } catch {
+    dbConnection = 'disconnected';
+  }
 
   try {
     const ch = broker.getChannel();
