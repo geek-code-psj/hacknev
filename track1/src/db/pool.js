@@ -64,6 +64,8 @@ async function initPool() {
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
     ssl: { rejectUnauthorized: false },
+    // Force IPv4 only
+    family: 4,
   });
 
   pool.on('error', (err) => {
