@@ -34,7 +34,9 @@ const pool = new Pool({
   ...pgConfig,
   max: 10,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000,
+  // Force IPv4 to avoid Supabase IPv6 routing issues on Railway
+  dnsResolution: 'ipv4',
 });
 
 pool.on('error', (err) => {
