@@ -34,17 +34,37 @@ async function initPool() {
 
   if (process.env.DATABASE_URL) {
     try {
-      const url = new URL(process.env.DATABASE_URL);
-      // Use hostname directly - pg library handles DNS
-      pgConfig = {
-        host: url.hostname,
-        port: parseInt(url.port || '5432'),
-        database: url.pathname.replace('/', ''),
-        user: url.username,
-        password: url.password,
-      };
+      // URL may have special chars - try to parse, fallback to manual parsing
+      let url;
+      try {
+        url = new URL(process.env.DATABASE_URL);
+      } catch {
+        // Manual parse as fallback
+        console.log('>>> DB: using manual parse');
+        const match = process.env.DATABASE_URL.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
+        if (match) {
+          pgConfig = {
+            host: match[3],
+            port: parseInt(match[4]),
+            database: match[5],
+            user: match[1],
+            password: match[2],
+          };
+        } else {
+          throw new Error('Cannot parse DATABASE_URL');
+        }
+      }
+      if (url) {
+        pgConfig = {
+          host: url.hostname,
+          port: parseInt(url.port || '5432'),
+          database: url.pathname.replace('/', ''),
+          user: url.username,
+          password: url.password,
+        };
+      }
     } catch (e) {
-      console.error('>>> DB URL PARSE ERROR:', e.message);
+      console.error('>>> DB URL PARSE ERROR:', e.message, 'URL:', process.env.DATABASE_URL?.substring(0, 50));
     }
   } else {
     pgConfig = {
