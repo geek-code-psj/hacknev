@@ -82,7 +82,7 @@ async function start() {
       console.log(JSON.stringify({ event: 'server_ready', port: PORT }));
     });
   } catch (err) {
-    console.error(JSON.stringify({ event: 'startup_fatal', error: err.message, stack: err.stack }));
+    console.error(JSON.stringify({ event: 'startup_fatal', error: err.message || String(err), stack: err.stack }));
     process.exit(1);
   }
 }
