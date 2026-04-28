@@ -1,6 +1,8 @@
 'use strict';
 require('dotenv').config();
 
+console.log('>>> NevUp starting, DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'NOT SET');
+
 const express = require('express');
 const helmet  = require('helmet');
 const cors    = require('cors');
