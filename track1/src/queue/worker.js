@@ -196,41 +196,30 @@ async function updateTimeseries(client, userId) {
  * Check overtrading: >10 trades in any 30-min sliding window
  * Uses DB-side window function for O(1) performance instead of O(n²) app-side
  */
-async function checkOvertrading(userId) {
+async function checkOvertrading(userId, entryAt) {
   const client = await pool.connect();
   try {
-    // Use SQL window functions to detect overtrading in a single query
-    // This replaces the O(n²) JS loop with a single DB round-trip
     const res = await client.query(
-      `WITH recent_trades AS (
-        SELECT "entryAt", "tradeId",
-               COUNT(*) OVER (
-                 ORDER BY "entryAt"
-                 ROWS BETWEEN 10 PRECEDING AND CURRENT ROW
-               ) AS window_count
-        FROM trades
-        WHERE "userId" = $1 AND "entryAt" > NOW() - INTERVAL '1 hour'
-        ORDER BY "entryAt"
-      )
-      SELECT "entryAt", "tradeId", window_count
-      FROM recent_trades
-      WHERE window_count > 10
-      LIMIT 1`,
-      [userId]
+      `SELECT COUNT(*) AS trade_count
+       FROM trades
+       WHERE "userId" = $1 
+         AND "entryAt" > $2::timestamptz - INTERVAL '30 minutes'
+         AND "entryAt" <= $2::timestamptz`,
+      [userId, entryAt]
     );
 
-    if (res.rows.length > 0) {
-      const { entryAt, window_count } = res.rows[0];
-      const windowStart = new Date(entryAt.getTime() - 30 * 60 * 1000);
-      const windowEnd = new Date(entryAt.getTime());
+    const count = parseInt(res.rows[0].trade_count);
+    if (count > 10) {
+      const windowStart = new Date(new Date(entryAt).getTime() - 30 * 60 * 1000);
+      const windowEnd = new Date(entryAt);
 
       await client.query(
         `INSERT INTO overtrading_events ("userId", window_start, window_end, trade_count)
          VALUES ($1, $2, $3, $4)
          ON CONFLICT DO NOTHING`,
-        [userId, windowStart.toISOString(), windowEnd.toISOString(), window_count]
+        [userId, windowStart.toISOString(), windowEnd.toISOString(), count]
       );
-      console.log(JSON.stringify({ event: 'overtrading_detected', userId, count: window_count }));
+      console.log(JSON.stringify({ event: 'overtrading_detected', userId, count }));
     }
   } finally {
     client.release();
@@ -277,7 +266,7 @@ async function main() {
     try {
       const payload = JSON.parse(msg.content.toString());
       const { userId } = payload;
-      await checkOvertrading(userId);
+      await checkOvertrading(userId, payload.entryAt);
       broker.ack(msg);
       console.log(JSON.stringify({ event: 'overtrading_checked', userId }));
     } catch (err) {
