@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "runAt": "2026-04-28T05:51:13.986Z",
+    "traderCount": 10,
+    "pathologies": 9,
+    "accuracy": 1
+  },
+  "macroAverage": {
+    "precision": 1,
+    "recall": 1,
+    "f1": 1
+  },
+  "perClass": {
+    "revenge_trading": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "overtrading": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "fomo_entries": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "plan_non_adherence": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "premature_exit": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "loss_running": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "session_tilt": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "time_of_day_bias": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    },
+    "position_sizing_inconsistency": {
+      "precision": 1,
+      "recall": 1,
+      "f1": 1,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0
+    }
+  },
+  "perTrader": [
+    {
+      "name": "Alex Mercer",
+      "userId": "f412f236-4edc-47a2-8f54-8763a6ed2ce8",
+      "groundTruth": [
+        "revenge_trading"
+      ],
+      "predicted": [
+        "revenge_trading"
+      ],
+      "correct": [
+        "revenge_trading"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Jordan Lee",
+      "userId": "fcd434aa-2201-4060-aeb2-f44c77aa0683",
+      "groundTruth": [
+        "overtrading"
+      ],
+      "predicted": [
+        "overtrading"
+      ],
+      "correct": [
+        "overtrading"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Sam Rivera",
+      "userId": "84a6a3dd-f2d0-4167-960b-7319a6033d49",
+      "groundTruth": [
+        "fomo_entries"
+      ],
+      "predicted": [
+        "fomo_entries"
+      ],
+      "correct": [
+        "fomo_entries"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Casey Kim",
+      "userId": "4f2f0816-f350-4684-b6c3-29bbddbb1869",
+      "groundTruth": [
+        "plan_non_adherence"
+      ],
+      "predicted": [
+        "plan_non_adherence"
+      ],
+      "correct": [
+        "plan_non_adherence"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Morgan Bell",
+      "userId": "75076413-e8e8-44ac-861f-c7acb3902d6d",
+      "groundTruth": [
+        "premature_exit"
+      ],
+      "predicted": [
+        "premature_exit"
+      ],
+      "correct": [
+        "premature_exit"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Taylor Grant",
+      "userId": "8effb0f2-f16b-4b5f-87ab-7ffca376f309",
+      "groundTruth": [
+        "loss_running"
+      ],
+      "predicted": [
+        "loss_running"
+      ],
+      "correct": [
+        "loss_running"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Riley Stone",
+      "userId": "50dd1053-73b0-43c5-8d0f-d2af88c01451",
+      "groundTruth": [
+        "session_tilt"
+      ],
+      "predicted": [
+        "session_tilt"
+      ],
+      "correct": [
+        "session_tilt"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Drew Patel",
+      "userId": "af2cfc5e-c132-4989-9c12-2913f89271fb",
+      "groundTruth": [
+        "time_of_day_bias"
+      ],
+      "predicted": [
+        "time_of_day_bias"
+      ],
+      "correct": [
+        "time_of_day_bias"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Quinn Torres",
+      "userId": "9419073a-3d58-4ee6-a917-be2d40aecef2",
+      "groundTruth": [
+        "position_sizing_inconsistency"
+      ],
+      "predicted": [
+        "position_sizing_inconsistency"
+      ],
+      "correct": [
+        "position_sizing_inconsistency"
+      ],
+      "falsePositives": [],
+      "missed": []
+    },
+    {
+      "name": "Avery Chen",
+      "userId": "e84ea28c-e5a7-49ef-ac26-a873e32667bd",
+      "groundTruth": [],
+      "predicted": [],
+      "correct": [],
+      "falsePositives": [],
+      "missed": []
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+
+# Combined NevUp Hackathon Stack
+# Run with: docker compose up
+# This starts both Track 1 (API) and Track 2 (AI Engine)
+
+services:
+  # PostgreSQL - shared database for Track 1
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nevup
+      POSTGRES_USER: nevup
+      POSTGRES_PASSWORD: nevup_secret
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nevup"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # RabbitMQ - message queue for async metrics
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: nevup
+      RABBITMQ_DEFAULT_PASS: nevup_secret
+    volumes:
+      - rabbit_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+
+  # Track 1 - Backend API
+  api:
+    build:
+      context: ./track1
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nevup
+      DB_USER: nevup
+      DB_PASSWORD: nevup_secret
+      RABBITMQ_URL: amqp://nevup:nevup_secret@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Track 1 - Metrics Worker
+  worker:
+    build:
+      context: ./track1
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: node src/queue/worker.js
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: nevup
+      DB_USER: nevup
+      DB_PASSWORD: nevup_secret
+      RABBITMQ_URL: amqp://nevup:nevup_secret@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Track 2 - AI Engine
+  ai-engine:
+    build:
+      context: ./track2
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      SQLITE_PATH: /data/memory.db
+    volumes:
+      - memory_data:/data
+
+volumes:
+  pg_data:
+  rabbit_data:
+  memory_data:

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \"3001\")",
+      "Bash(taskkill *)",
+      "Bash(timeout 5)"
+    ]
+  }
+}

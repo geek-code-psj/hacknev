@@ -1,0 +1,18 @@
+
+services:
+  ai-engine:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      SQLITE_PATH: /data/memory.db
+    volumes:
+      - memory_data:/data
+
+volumes:
+  memory_data:
